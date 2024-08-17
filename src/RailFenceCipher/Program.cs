@@ -15,27 +15,31 @@ static public class RailFenceCipher
             while (indexes.First < s.Length)
             {
                 cycle++;
-                if (indexes.First == indexes.Second)
+                if (IsMinOrMaxDepth(indexes, i, n))
                 {
-                    output += s[indexes.First].ToString();
+                    AddLetterToOutput(ref output, indexes.First, s);
                 }
                 else
                 {
-                    if (IsValidIndex(indexes.First, s) && IsNotMaxDepth(i, n)) { output += s[indexes.First].ToString(); }
-                    if (IsValidIndex(indexes.Second, s)) { output += s[indexes.Second].ToString(); }
+                    AddLetterToOutput(ref output, indexes.First, s);
+                    AddLetterToOutput(ref output, indexes.Second, s);
                 }
-
                 indexes = CalculateIndexes(cycle, n, i);
             }
         }
         return output;
     }
+    private static bool IsMinOrMaxDepth((int First, int Second) indexes, int currentDepth, int maxDepth) => indexes.First == indexes.Second || IsMaxDepth(currentDepth, maxDepth);
     private static (int First, int Second) CalculateIndexes(int cycle, int depth, int currentline)
     {
         return (First: CalculateFirstIndex(cycle, depth, currentline), Second: CalculateSecondIndex(cycle, depth, currentline));
     }
+    private static void AddLetterToOutput(ref string output, int index, string originalString)
+    {
+        if (IsValidIndex(index, originalString)) { output += originalString[index].ToString(); }
+    }
     //currentDepth starts at 0
-    private static bool IsNotMaxDepth(int currentDepth, int maxDepth) => maxDepth != currentDepth + 1;
+    private static bool IsMaxDepth(int currentDepth, int maxDepth) => maxDepth == currentDepth + 1;
 
     private static int CalculateSecondIndex(int cycle, int depth, int currentline)
     {

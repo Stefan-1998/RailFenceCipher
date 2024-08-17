@@ -1,0 +1,63 @@
+Logic for RailFenceCiper
+
+
+Encryption
+"WEAREDISCOVEREDFLEEATONCE"
+
+What inputs do i have:
+The depth:         n
+The current cycle: k
+
+0 1 2 3 4 5 6 7 8 9 101112131415161718192021222324
+W       E       C       R       L       T       E   
+  E   R   D   S   O   E   E   F   E   A   O   C  
+    A       I       V       D       E       N   
+
+For depth 3:
+
+
+First line:
+0 4 8 12 16 20 24 | Always +4  ->could be k(n+n-2)
+
+Second line:
+1 3 4 7 9 11 13 15 17 19 21 23 25 | Always +2 k(2n-2)+-1
+
+Third line:
+2 6 10 14 18 22 | Always +4 | could be n+1 k(n+n-2)+-2
+
+
+0 1 2 3 4 5 6 7 8 9 101112131415161718192021222324
+W           I           R           E           E   
+  E       D   S       E   E       E   A       C  
+    A   E       C   V       D   L       E   N   
+      R           O           F           O        
+
+For depth 4:
+
+First line:
+0 6 12 18 24 | +6 -> k(2n-2)
+
+Second line:
+1 5 7 11 13 17 19 23 | +2 +4  -> k(2n-2)+-1
+
+Third line:
+2 4 8 10 14 16 20 22 | +2 +4  -> k(2n-2)+-2
+
+Fourth line:
+3 9 15 21 | +6 | k(2n-2)+-3
+
+0 1 2 3 4 5 6 7 8 9 101112131415161718192021222324
+W               C               L               E   
+  E           S   O           F   E           C  
+    A       I       V       D       E       N   
+      R   D           E   E           A   O        
+        E               E               E              
+
+For depth 5:
+
+First line:
+0 8 16 24 | +8 -> k(2n-2)
+
+Second line:
+1 7 9 15 17 23  | +2 +4  -> k(2n-2)+-1
+...
