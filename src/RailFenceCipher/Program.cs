@@ -59,18 +59,64 @@ static public class RailFenceCipher
     public static string Decode(string s, int n)
     {
         if (String.IsNullOrEmpty(s)) { return String.Empty; }
-        int linesizes = s.Length % n == 0 ? s.Length / n : s.Length / n + 1;
-        List<string> lines = new();
+        char[,] rail = new char[n, s.Length];
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < s.Length; j++)
+                rail[i, j] = '\n';
+
+        bool isDownwardDirection = true;
+        int row = 0;
+        int col = 0;
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            // check the direction of flow
+            if (row == 0)
+                isDownwardDirection = true;
+            if (row == n - 1)
+                isDownwardDirection = false;
+
+            // place the marker
+            rail[row, col++] = '*';
+
+            // find the next row using direction flag
+            row = isDownwardDirection ? row + 1 : row - 1;
+        }
+
+        // now we can construct the fill the rail matrix
+        int index = 0;
         for (int i = 0; i < n; i++)
         {
-            try { lines.Add(s.Substring(i * linesizes, linesizes)); }
-            catch { lines.Add(s.Substring(i * linesizes, linesizes - 1)); }
+            for (int j = 0; j < s.Length; j++)
+            {
+                if (rail[i, j] == '*' && index < s.Length)
+                { rail[i, j] = s[index++]; }
+            }
         }
+
+
+
+        row = 0;
+        col = 0;
         string output = String.Empty;
-        for (int i = 0; i < lines[0].Length; i++)
+        for (int i = 0; i < s.Length; i++)
         {
-            try { lines.ForEach(x => output += x[i]); }
-            catch { }
+            // check the direction of flow
+            if (row == 0)
+                isDownwardDirection = true;
+            if (row == n - 1)
+                isDownwardDirection = false;
+
+            // place the marker
+            if (rail[row, col] != '*')
+            {
+                output += rail[row, col].ToString();
+                col++;
+            }
+
+            // find the next row using direction flag
+            row = isDownwardDirection ? row++ : row--;
         }
 
         return output;
