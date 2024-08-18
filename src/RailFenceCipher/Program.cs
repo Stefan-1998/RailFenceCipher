@@ -59,6 +59,20 @@ static public class RailFenceCipher
     public static string Decode(string s, int n)
     {
         if (String.IsNullOrEmpty(s)) { return String.Empty; }
-        return String.Empty;
+        int linesizes = s.Length % n == 0 ? s.Length / n : s.Length / n + 1;
+        List<string> lines = new();
+        for (int i = 0; i < n; i++)
+        {
+            try { lines.Add(s.Substring(i * linesizes, linesizes)); }
+            catch { lines.Add(s.Substring(i * linesizes, linesizes - 1)); }
+        }
+        string output = String.Empty;
+        for (int i = 0; i < lines[0].Length; i++)
+        {
+            try { lines.ForEach(x => output += x[i]); }
+            catch { }
+        }
+
+        return output;
     }
 }

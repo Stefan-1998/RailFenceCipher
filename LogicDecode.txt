@@ -1,0 +1,33 @@
+Logic for RailFenceCiper
+
+
+Decryption
+"WECRLTEERDSOEEFEAOCAIVDEN"
+
+What inputs do i have:
+The depth:         n
+The current cycle: k
+
+0 7 198 1 92010 2112112 3132214 4152316 5 1724186 
+W       E       C       R       L       T       E   
+  E   R   D   S   O   E   E   F   E   A   O   C  
+    A       I       V       D       E       N   
+
+For depth 3:
+
+Indexes would be
+0 7 19 8 1 9 20 10 2 11 21 12 3 13 22 14 4 15 23 16 5 17 24 18 6 
+
+
+https://en.wikipedia.org/wiki/Rail_fence_cipher
+
+The breaking point is splitting the lines into the correct lenghts
+
+ 
+"WECRLTEERDSOEEFEAOCAIVDEN" needs to be split up into WECRLTE ERDSOEEFEAOC AIVDEN
+The lenght of each of those lines is affected by the lenght of the hole string
+Each string could have +1 -1 length
+
+
+
+
