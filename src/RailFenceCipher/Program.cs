@@ -3,59 +3,38 @@
 static public class RailFenceCipher
 {
     static void Main() { }
+
+
+    private enum Direction { Up, Down }
     public static string Encode(string s, int n)
     {
         if (String.IsNullOrEmpty(s)) { return String.Empty; }
-        var output = String.Empty;
-        for (int i = 0; i < n; i++)
-        {
-            int cycle = 0;
-            var indexes = CalculateIndexes(cycle, n, i);
+        char[,] rail = new char[n, s.Length];
+        InitializeRail(ref rail, n, s.Length);
+        FillDiagonalsWithMessage(ref rail, n, s);
+        return ReadOutEncryptedMessagen(ref rail, n, s.Length);
+    }
+    public static string Decode(string s, int n)
+    {
+        if (String.IsNullOrEmpty(s)) { return String.Empty; }
+        char[,] rail = new char[n, s.Length];
+        InitializeRail(ref rail, n, s.Length);
+        FillDiagonalsWithPlaceHolder(ref rail, n, s.Length);
+        FillCipher(ref rail, n, s);
+        return ReadOutDecryptedMessage(ref rail, n, s.Length);
+    }
 
-            while (indexes.First < s.Length)
-            {
-                cycle++;
-                if (IsMinOrMaxDepth(indexes, i, n))
+    private static string ReadOutEncryptedMessagen(ref char[,] rails, int depth, int messageLength)
+    {
+        string output = String.Empty;
+        for (int i = 0; i < depth; i++)
+            for (int j = 0; j < messageLength; j++)
+                if (rails[i, j] != (char)0b1111111)
                 {
-                    AddLetterToOutput(ref output, indexes.First, s);
+                    output += rails[i, j].ToString();
                 }
-                else
-                {
-                    AddLetterToOutput(ref output, indexes.First, s);
-                    AddLetterToOutput(ref output, indexes.Second, s);
-                }
-                indexes = CalculateIndexes(cycle, n, i);
-            }
-        }
         return output;
     }
-    private static bool IsMinOrMaxDepth((int First, int Second) indexes, int currentDepth, int maxDepth) => indexes.First == indexes.Second || IsMaxDepth(currentDepth, maxDepth);
-    private static (int First, int Second) CalculateIndexes(int cycle, int depth, int currentline)
-    {
-        return (First: CalculateFirstIndex(cycle, depth, currentline), Second: CalculateSecondIndex(cycle, depth, currentline));
-    }
-    private static void AddLetterToOutput(ref string output, int index, string originalString)
-    {
-        if (IsValidIndex(index, originalString)) { output += originalString[index].ToString(); }
-    }
-    //currentDepth starts at 0
-    private static bool IsMaxDepth(int currentDepth, int maxDepth) => maxDepth == currentDepth + 1;
-
-    private static int CalculateSecondIndex(int cycle, int depth, int currentline)
-    {
-        return cycle * (2 * depth - 2) + currentline;
-    }
-    private static int CalculateFirstIndex(int cycle, int depth, int currentline)
-    {
-        return cycle * (2 * depth - 2) - currentline;
-    }
-    private static bool IsValidIndex(int index, string text)
-    {
-        if (index < 0) { return false; }
-        if (index > text.Length - 1) { return false; }
-        return true;
-    }
-    private enum Direction { Up, Down }
     private static int MoveToNextRow(int row, Direction currentDirection)
     {
         if (currentDirection == Direction.Down) return row + 1;
@@ -68,46 +47,66 @@ static public class RailFenceCipher
         if (row == depth - 1 && currentDirection == Direction.Down) return Direction.Up;
         return currentDirection;
     }
-    public static string Decode(string s, int n)
+    private static void FillDiagonalsWithPlaceHolder(ref char[,] rails, int depth, int length)
     {
-        if (String.IsNullOrEmpty(s)) { return String.Empty; }
-        char[,] rail = new char[n, s.Length];
-
-
         Direction currentDirection = Direction.Down;
         int row = 0;
 
-        for (int i = 0; i < s.Length; i++)
+        for (int i = 0; i < length; i++)
         {
-            currentDirection = GetCurrentDirection(row, n, currentDirection);
-            rail[row, i] = '*';
+            currentDirection = GetCurrentDirection(row, depth, currentDirection);
+            rails[row, i] = '*';
             row = MoveToNextRow(row, currentDirection);
         }
+    }
+    private static void FillDiagonalsWithMessage(ref char[,] rails, int depth, string message)
+    {
+        Direction currentDirection = Direction.Down;
+        int row = 0;
 
+        for (int i = 0; i < message.Length; i++)
+        {
+            currentDirection = GetCurrentDirection(row, depth, currentDirection);
+            rails[row, i] = message[i];
+            row = MoveToNextRow(row, currentDirection);
+        }
+    }
+    private static void FillCipher(ref char[,] rails, int depth, string ReadOutEncryptedMessagen)
+    {
         int index = 0;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < depth; i++)
         {
-            for (int j = 0; j < s.Length; j++)
+            for (int j = 0; j < ReadOutEncryptedMessagen.Length; j++)
             {
-                if (rail[i, j] == '*' && index < s.Length)
-                { rail[i, j] = s[index++]; }
+                if (rails[i, j] == '*' && index < ReadOutEncryptedMessagen.Length)
+                { rails[i, j] = ReadOutEncryptedMessagen[index++]; }
             }
         }
-
-        row = 0;
-        currentDirection = Direction.Down;
+    }
+    private static string ReadOutDecryptedMessage(ref char[,] rails, int depth, int messageLength)
+    {
+        int row = 0;
+        Direction currentDirection = Direction.Down;
         string output = String.Empty;
-        for (int i = 0; i < s.Length; i++)
+        for (int i = 0; i < messageLength; i++)
         {
-            currentDirection = GetCurrentDirection(row, n, currentDirection);
+            currentDirection = GetCurrentDirection(row, depth, currentDirection);
 
-            if (rail[row, i] != '*')
+            if (rails[row, i] != '*')
             {
-                output += rail[row, i].ToString();
+                output += rails[row, i].ToString();
             }
             row = MoveToNextRow(row, currentDirection);
         }
-
         return output;
     }
+    private static void InitializeRail(ref char[,] rails, int depth, int messageLength)
+    {
+        //Without setting the default value. The current memory entries are used -> Could cause sporadic erros
+        for (int i = 0; i < messageLength; i++)
+            for (int j = 0; j < depth; j++)
+                rails[j, i] = (char)0b1111111;
+    }
+
+
 }
