@@ -55,36 +55,35 @@ static public class RailFenceCipher
         if (index > text.Length - 1) { return false; }
         return true;
     }
+    private enum Direction { Up, Down }
+    private static int MoveToNextRow(int row, Direction currentDirection)
+    {
+        if (currentDirection == Direction.Down) return row + 1;
+        return row - 1;
+    }
 
+    private static Direction GetCurrentDirection(int row, int depth, Direction currentDirection)
+    {
+        if (row == 0 && currentDirection == Direction.Up) return Direction.Down;
+        if (row == depth - 1 && currentDirection == Direction.Down) return Direction.Up;
+        return currentDirection;
+    }
     public static string Decode(string s, int n)
     {
         if (String.IsNullOrEmpty(s)) { return String.Empty; }
         char[,] rail = new char[n, s.Length];
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < s.Length; j++)
-                rail[i, j] = '\n';
 
-        bool isDownwardDirection = true;
+        Direction currentDirection = Direction.Down;
         int row = 0;
-        int col = 0;
 
         for (int i = 0; i < s.Length; i++)
         {
-            // check the direction of flow
-            if (row == 0)
-                isDownwardDirection = true;
-            if (row == n - 1)
-                isDownwardDirection = false;
-
-            // place the marker
-            rail[row, col++] = '*';
-
-            // find the next row using direction flag
-            row = isDownwardDirection ? row + 1 : row - 1;
+            currentDirection = GetCurrentDirection(row, n, currentDirection);
+            rail[row, i] = '*';
+            row = MoveToNextRow(row, currentDirection);
         }
 
-        // now we can construct the fill the rail matrix
         int index = 0;
         for (int i = 0; i < n; i++)
         {
@@ -95,28 +94,18 @@ static public class RailFenceCipher
             }
         }
 
-
-
         row = 0;
-        col = 0;
+        currentDirection = Direction.Down;
         string output = String.Empty;
         for (int i = 0; i < s.Length; i++)
         {
-            // check the direction of flow
-            if (row == 0)
-                isDownwardDirection = true;
-            if (row == n - 1)
-                isDownwardDirection = false;
+            currentDirection = GetCurrentDirection(row, n, currentDirection);
 
-            // place the marker
-            if (rail[row, col] != '*')
+            if (rail[row, i] != '*')
             {
-                output += rail[row, col].ToString();
-                col++;
+                output += rail[row, i].ToString();
             }
-
-            // find the next row using direction flag
-            row = isDownwardDirection ? row++ : row--;
+            row = MoveToNextRow(row, currentDirection);
         }
 
         return output;
